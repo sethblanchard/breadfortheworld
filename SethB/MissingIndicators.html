@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+
+<head>
+	<meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Missing Data</title>
+  <style>
+
+  	#Chart{
+  		width: 100%;
+  		background-image: url('../img/woman.jpg');
+  		padding-top: 66.7480469%;
+  		background-size: cover;
+  		position: relative;
+  		z-index:1;
+  	}
+  	
+	.row{
+		position: absolute;
+		left:0;
+  		z-index:10;
+
+	}
+
+  	.cell{
+  		top:0;
+  		position:absolute;
+  		z-index:100;
+  	}
+
+  	.cell:hover{
+  		border: solid 2px #e28d00;
+  		z-index: 10000;
+  	}
+
+  </style>
+</head>
+<body>
+	<header class="">
+			<h1>Missing Data</h1>
+	</header>
+	<div id="Chart">
+	</div>
+  
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://d3js.org/d3.v3.js"></script>
+<script>
+
+	var csvUrl = "../Data/World Bank Gender Stat Indicators (1990-2013).csv";
+
+	var logTheData = {};
+
+	
+	var missingIndicators = function(data){
+
+		console.log(data);
+		logTheData = data;
+
+
+		var indicators = d3.nest()
+			.key(function(d) { return d['Indicator Name']; })
+			.entries(data);
+
+		var countries = d3.nest()
+			.key(function(d) { return d['Country Name']; })
+			.key(function(d){ return d['Indicator Name'];})
+			.map(data, d3.map);
+
+		var width = $('#Chart').width(),
+			aspectRatio = .667480469,
+			height = width*aspectRatio,
+			bW = width/countries.size(),
+			bH = height/indicators.length;
+
+			console.log(bW);
+			console.log(bH);
+
+		// var svg = d3.select('#chart').append('svg')
+  //             .attr('width', width)
+  //             .attr('height', height)
+  //             .append("g");
+
+      	var rows = d3.select('#Chart').selectAll('.row')
+      		.data(indicators)
+      		.enter().append('div')
+      			.attr('data-key', function(d,i){ 
+      				return d.key; 
+      			})
+      			.attr('class', 'row')
+      			.style('width', width + "px")
+      			.style('height', bH + "px")
+      			.style('top', function(d,i){ return (i*bH) + 'px'; });
+      			
+
+		var cells = rows.selectAll('.cell')
+			.data(countries.values())
+			.enter().append('div')
+			.attr('class', 'cell')
+			.style('width', bW + "px")
+  			.style('height', bH + "px")
+			.style('left', function(d,i){ return (i*bW) + 'px'; })
+			.style('background', function(d,i){ 
+				var indicator = $(this).parent().attr('data-key'),
+					item = d.get(indicator);
+					if(item == undefined) return 'rgba(255,255,255,1)';
+					numPoints = +item[0]["How many TOTAL data points, 1990-2013?"],
+					val = 1 - numPoints/13;
+				return  'rgba(255,255,255,'+ val +')'  });
+
+			var breakPoint = "";
+
+	}
+
+	d3.csv(csvUrl, missingIndicators);
+
+</script>
+
+<script>
+
+// var margin = {top: 20, right: 20, bottom: 30, left: 50},
+//     width = 960 - margin.left - margin.right,
+//     height = 500 - margin.top - margin.bottom;
+
+// var parseDate = d3.time.format("%d-%b-%y").parse;
+
+// var x = d3.time.scale()
+//     .range([0, width]);
+
+// var y = d3.scale.linear()
+//     .range([height, 0]);
+
+// var xAxis = d3.svg.axis()
+//     .scale(x)
+//     .orient("bottom");
+
+// var yAxis = d3.svg.axis()
+//     .scale(y)
+//     .orient("left");
+
+// var line = d3.svg.line()
+//     .x(function(d) { return x(d.date); })
+//     .y(function(d) { return y(d.close); });
+
+// var svg = d3.select("body").append("svg")
+//     .attr("width", width + margin.left + margin.right)
+//     .attr("height", height + margin.top + margin.bottom)
+//   .append("g")
+//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+</script>
+
+
+</body>
+</html>
